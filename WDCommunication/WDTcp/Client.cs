@@ -14,19 +14,19 @@ namespace WDCommunication.WDTcp
         /// <summary>
         /// 服务端已断开
         /// </summary>
-        public event DelegateDisconnect? OnDisconnect;
+        public event DelegateDisconnect? EventDisconnect;
         public delegate void DelegateDisconnect(object sender, IPEndPoint ServerIpPoint);
 
         /// <summary>
         /// 发送数据的事件
         /// </summary>
-        public event DelegateAfterSend? OnAfterSend;
+        public event DelegateAfterSend? EventAfterSend;
         public delegate void DelegateAfterSend(object sender, DataEventAges e);
 
         /// <summary>
         /// 接收数据之后的事件
         /// </summary>
-        public event DelegateAfterReceive? OnAfterReceive;
+        public event DelegateAfterReceive? EventAfterReceive;
         public delegate void DelegateAfterReceive(object sender, DataEventAges e);
         #endregion
 
@@ -34,7 +34,7 @@ namespace WDCommunication.WDTcp
         {
             this.ServerIpPoint = IpEndPoint;
             EventConnection += Client_OnConnection;
-            OnDisconnect += Client_OnDisconnect;
+            EventDisconnect += Client_OnDisconnect;
         }
 
         private void Client_OnDisconnect(object sender, IPEndPoint ServerIpPoint)
@@ -63,13 +63,13 @@ namespace WDCommunication.WDTcp
                         if (len > 0)
                         {
                             byte[] data = buffer.Take(len).ToArray();
-                            OnAfterReceive?.Invoke(this, new DataEventAges(ServerIpPoint, DataEventAges.EnumDataType.Receive, data));
+                            EventAfterReceive?.Invoke(this, new DataEventAges(ServerIpPoint, DataEventAges.EnumDataType.Receive, data));
                         }
                     }
                 }
                 catch
                 {
-                    OnDisconnect?.Invoke(this, ServerIpPoint);
+                    EventDisconnect?.Invoke(this, ServerIpPoint);
                 }
             }, TokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
         }
@@ -120,7 +120,7 @@ namespace WDCommunication.WDTcp
             await Task.Run(() =>
             {
                 TcpClient.Close();
-                OnDisconnect?.Invoke(this, ServerIpPoint);
+                EventDisconnect?.Invoke(this, ServerIpPoint);
             });
         }
         /// <summary>
@@ -134,7 +134,7 @@ namespace WDCommunication.WDTcp
             {
                 var NetStream = TcpClient.GetStream();
                 await NetStream.WriteAsync(data);
-                OnAfterSend?.Invoke(this, new DataEventAges(ServerIpPoint, DataEventAges.EnumDataType.Send, data));
+                EventAfterSend?.Invoke(this, new DataEventAges(ServerIpPoint, DataEventAges.EnumDataType.Send, data));
             }
         }
 

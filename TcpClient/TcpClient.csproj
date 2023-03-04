@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WDSocket\WDCommunication.csproj" />
+    <ProjectReference Include="..\WDCommunication\WDCommunication.csproj" />
   </ItemGroup>
 
 </Project>

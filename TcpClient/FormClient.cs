@@ -38,8 +38,8 @@ namespace TcpClient
         {
             TcpClient = new Client(new System.Net.IPEndPoint(System.Net.IPAddress.Parse(txtIp.Text), int.Parse(txtPort.Text)));
             TcpClient.EventConnection += TcpClient_OnConnection;
-            TcpClient.OnDisconnect += TcpClient_OnDisconnect;
-            TcpClient.OnAfterReceive += TcpClient_OnAfterReceive;
+            TcpClient.EventDisconnect += TcpClient_OnDisconnect;
+            TcpClient.EventAfterReceive += TcpClient_OnAfterReceive;
             TcpClient.ConnectAsync().ConfigureAwait(false);
         }
 
