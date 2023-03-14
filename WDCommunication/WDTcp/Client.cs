@@ -32,9 +32,16 @@ namespace WDCommunication.WDTcp
 
         public Client(IPEndPoint IpEndPoint)
         {
-            this.ServerIpPoint = IpEndPoint;
+            ServerIpPoint = IpEndPoint;
             EventConnection += Client_OnConnection;
             EventDisconnect += Client_OnDisconnect;
+            TimerConnect.Interval = 3000;
+            TimerConnect.Elapsed += TimerConnect_Elapsed;
+        }
+
+        private void TimerConnect_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            Connect();
         }
 
         private void Client_OnDisconnect(object sender, IPEndPoint ServerIpPoint)
@@ -50,6 +57,8 @@ namespace WDCommunication.WDTcp
         private void Client_OnConnection(object sender, IPEndPoint ServerIpPoint, bool success)
         {
             if (!success) return;
+            failCount = 0;
+            if (TimerConnect.Enabled) TimerConnect.Stop();
             TokenSource = new CancellationTokenSource();
             Task.Factory.StartNew(() =>
             {
@@ -69,12 +78,13 @@ namespace WDCommunication.WDTcp
                 }
                 catch
                 {
+                    TcpClient.Close();
                     EventDisconnect?.Invoke(this, ServerIpPoint);
                 }
             }, TokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
         }
 
-        private readonly TcpClient TcpClient = new();
+        private TcpClient TcpClient = new();
         private CancellationTokenSource TokenSource = new();
         /// <summary>
         /// 连接状态
@@ -92,6 +102,40 @@ namespace WDCommunication.WDTcp
         /// 服务端端口
         /// </summary>
         public int ServerPort { get => ServerIpPoint.Port; }
+
+        /// <summary>
+        /// 重连计时器
+        /// </summary>
+        private System.Timers.Timer TimerConnect = new();
+        /// <summary>
+        /// 
+        /// </summary>
+        private System.Timers.Timer TimerHead = new();
+        private int failCount = 0;
+
+        /// <summary>
+        /// 连接服务端方法
+        /// </summary>
+        /// <returns></returns>
+        public void Connect()
+        {
+            try
+            {
+                TcpClient = new();
+                TcpClient.Connect(ServerIpPoint);
+                Connection = TcpClient.Connected;
+            }
+            catch
+            {
+                Connection = false;
+                failCount++;
+                if (!TimerConnect.Enabled) TimerConnect.Start();
+            }
+            finally
+            {
+                EventConnection?.Invoke(this, ServerIpPoint, Connection);
+            }
+        }
         /// <summary>
         /// 连接服务端方法
         /// </summary>
@@ -100,28 +144,25 @@ namespace WDCommunication.WDTcp
         {
             try
             {
+                TcpClient = new();
                 await TcpClient.ConnectAsync(ServerIpPoint);
-                Connection = true;
-                EventConnection?.Invoke(this, ServerIpPoint, true);
-                return true;
+                Connection = TcpClient.Connected;
             }
             catch
             {
                 Connection = false;
-                EventConnection?.Invoke(this, ServerIpPoint, false);
-                return false;
             }
+            finally {
+                EventConnection?.Invoke(this, ServerIpPoint, Connection);
+            }
+            return Connection;
         }
         /// <summary>
         /// 断开连接
         /// </summary>
-        public async Task DisconnectAsync()
+        public void Disconnect()
         {
-            await Task.Run(() =>
-            {
-                TcpClient.Close();
-                EventDisconnect?.Invoke(this, ServerIpPoint);
-            });
+            TcpClient.Close();
         }
         /// <summary>
         /// 发送数据
@@ -132,9 +173,17 @@ namespace WDCommunication.WDTcp
         {
             if (TcpClient.Connected)
             {
-                var NetStream = TcpClient.GetStream();
-                await NetStream.WriteAsync(data);
-                EventAfterSend?.Invoke(this, new DataEventAges(ServerIpPoint, DataEventAges.EnumDataType.Send, data));
+                try
+                {
+                    var NetStream = TcpClient.GetStream();
+                    await NetStream.WriteAsync(data);
+
+                    EventAfterSend?.Invoke(this, new DataEventAges(ServerIpPoint, DataEventAges.EnumDataType.Send, data));
+                }
+                catch
+                {
+                    
+                }
             }
         }
 
@@ -143,7 +192,6 @@ namespace WDCommunication.WDTcp
         /// </summary>
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
         }
     }
 }

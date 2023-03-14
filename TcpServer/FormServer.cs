@@ -18,7 +18,7 @@ namespace TcpServer
             tcpServer.EventAfterReceive += TcpServer_OnAfterReceive;
         }
 
-        private void TcpServer_OnStateChanged(object sender, StateEventArgs e)
+        private void TcpServer_OnStateChanged(object? sender, StateEventArgs e)
         {
             BeginInvoke(() =>
             {
@@ -38,7 +38,7 @@ namespace TcpServer
         }
 
         private int Total = 0;
-        private void TcpServer_OnAfterReceive(object sender, DataEventAges e)
+        private void TcpServer_OnAfterReceive(object? sender, DataEventAges e)
         {
             BeginInvoke(() =>
             {
@@ -49,12 +49,13 @@ namespace TcpServer
                     "HEX" => BitConverter.ToString(e.Data).Replace("-", " "),
                     _ => string.Empty,
                 };
-                var _ = ((Server)sender).SendAsync(e.IP_Port, e.Data);
+                string send = $"Received:{strOut}";
+                var _ = ((Server)sender!).SendAsync(e.IP_Port, Encoding.ASCII.GetBytes(send));
                 Print($"【{++Total}】.【{e.IPAddress}:{e.Port}】: {strOut}{Environment.NewLine}");
             });
         }
 
-        private void TcpServer_OnDisconnect(object sender, OnlineClient e)
+        private void TcpServer_OnDisconnect(object? sender, OnlineClient e)
         {
             BeginInvoke(() =>
             {
@@ -63,7 +64,7 @@ namespace TcpServer
             });
         }
 
-        private void TcpServer_OnConnection(object sender, OnlineClient e)
+        private void TcpServer_OnConnection(object? sender, OnlineClient e)
         {
             BeginInvoke(() =>
             {
@@ -72,7 +73,7 @@ namespace TcpServer
             });
         }
 
-        private void BtnStart_Click(object sender, EventArgs e)
+        private void BtnStart_Click(object? sender, EventArgs e)
         {
             try
             {
@@ -86,7 +87,7 @@ namespace TcpServer
             }
         }
 
-        private void BtnStop_Click(object sender, EventArgs e)
+        private void BtnStop_Click(object? sender, EventArgs e)
         {
             tcpServer.Stop();
         }

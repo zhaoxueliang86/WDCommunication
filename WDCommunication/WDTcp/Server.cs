@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace WDCommunication.WDTcp
 {
@@ -21,7 +22,7 @@ namespace WDCommunication.WDTcp
         /// <summary>
         /// 接收数据之前的事件
         /// </summary>
-        public event EventHandler<OnlineClient>? EventBeforeReceive;
+        //public event EventHandler<OnlineClient>? EventBeforeReceive;
         /// <summary>
         /// 接收数据之后的事件
         /// </summary>
@@ -294,12 +295,8 @@ namespace WDCommunication.WDTcp
             }
         }
 
-        /// <summary>
-        /// 资源回收
-        /// </summary>
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
         }
     }
 }

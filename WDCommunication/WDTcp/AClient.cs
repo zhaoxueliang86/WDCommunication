@@ -54,7 +54,7 @@ namespace WDCommunication.WDTcp
         /// </summary>
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
+            
         }
     }
 }

@@ -29,15 +29,17 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
+            textBox1 = new TextBox();
+            BtnStart1 = new Button();
+            BtnSend = new Button();
+            BtnStop = new Button();
             BtnStart = new Button();
             txtPort = new TextBox();
             txtIp = new TextBox();
-            BtnStop = new Button();
             groupBox2 = new GroupBox();
             rSend = new RichTextBox();
             groupBox3 = new GroupBox();
             rReceive = new RichTextBox();
-            BtnSend = new Button();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -45,6 +47,8 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(textBox1);
+            groupBox1.Controls.Add(BtnStart1);
             groupBox1.Controls.Add(BtnSend);
             groupBox1.Controls.Add(BtnStop);
             groupBox1.Controls.Add(BtnStart);
@@ -56,6 +60,51 @@
             groupBox1.Size = new Size(1503, 104);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
+            // 
+            // textBox1
+            // 
+            textBox1.Font = new Font("Arial", 14F, FontStyle.Regular, GraphicsUnit.Point);
+            textBox1.Location = new Point(759, 30);
+            textBox1.MaxLength = 15;
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(40, 40);
+            textBox1.TabIndex = 9;
+            textBox1.Text = "1";
+            // 
+            // BtnStart1
+            // 
+            BtnStart1.Font = new Font("Arial", 14F, FontStyle.Regular, GraphicsUnit.Point);
+            BtnStart1.Location = new Point(805, 29);
+            BtnStart1.Name = "BtnStart1";
+            BtnStart1.Size = new Size(151, 40);
+            BtnStart1.TabIndex = 8;
+            BtnStart1.Text = "连续重连";
+            BtnStart1.UseVisualStyleBackColor = true;
+            BtnStart1.Click += BtnStart1_Click;
+            // 
+            // BtnSend
+            // 
+            BtnSend.Enabled = false;
+            BtnSend.Font = new Font("Arial", 14F, FontStyle.Regular, GraphicsUnit.Point);
+            BtnSend.Location = new Point(1056, 28);
+            BtnSend.Name = "BtnSend";
+            BtnSend.Size = new Size(112, 40);
+            BtnSend.TabIndex = 7;
+            BtnSend.Text = "发送";
+            BtnSend.UseVisualStyleBackColor = true;
+            BtnSend.Click += BtnSend_Click;
+            // 
+            // BtnStop
+            // 
+            BtnStop.Enabled = false;
+            BtnStop.Font = new Font("Arial", 14F, FontStyle.Regular, GraphicsUnit.Point);
+            BtnStop.Location = new Point(489, 28);
+            BtnStop.Name = "BtnStop";
+            BtnStop.Size = new Size(112, 40);
+            BtnStop.TabIndex = 6;
+            BtnStop.Text = "断开";
+            BtnStop.UseVisualStyleBackColor = true;
+            BtnStop.Click += BtnStop_Click;
             // 
             // BtnStart
             // 
@@ -87,18 +136,6 @@
             txtIp.Size = new Size(239, 40);
             txtIp.TabIndex = 3;
             txtIp.Text = "127.0.0.1";
-            // 
-            // BtnStop
-            // 
-            BtnStop.Enabled = false;
-            BtnStop.Font = new Font("Arial", 14F, FontStyle.Regular, GraphicsUnit.Point);
-            BtnStop.Location = new Point(489, 28);
-            BtnStop.Name = "BtnStop";
-            BtnStop.Size = new Size(112, 40);
-            BtnStop.TabIndex = 6;
-            BtnStop.Text = "断开";
-            BtnStop.UseVisualStyleBackColor = true;
-            BtnStop.Click += BtnStop_Click;
             // 
             // groupBox2
             // 
@@ -138,18 +175,6 @@
             rReceive.TabIndex = 0;
             rReceive.Text = "";
             // 
-            // BtnSend
-            // 
-            BtnSend.Enabled = false;
-            BtnSend.Font = new Font("Arial", 14F, FontStyle.Regular, GraphicsUnit.Point);
-            BtnSend.Location = new Point(674, 28);
-            BtnSend.Name = "BtnSend";
-            BtnSend.Size = new Size(112, 40);
-            BtnSend.TabIndex = 7;
-            BtnSend.Text = "发送";
-            BtnSend.UseVisualStyleBackColor = true;
-            BtnSend.Click += BtnSend_Click;
-            // 
             // FormClient
             // 
             AutoScaleDimensions = new SizeF(11F, 24F);
@@ -179,5 +204,7 @@
         private RichTextBox rSend;
         private GroupBox groupBox3;
         private RichTextBox rReceive;
+        private TextBox textBox1;
+        private Button BtnStart1;
     }
 }
