@@ -33,8 +33,8 @@ namespace WDCommunication.WDTcp
         public event EventHandler<DataEventAges>? EventAfterSend;
         #endregion
 
-        #region 定义私有对象
-        private CancellationTokenSource? TokenSource;
+        #region 私有对象
+        private CancellationTokenSource? CancelTokenSource;
         /// <summary>
         /// 监听对象
         /// </summary>
@@ -42,7 +42,7 @@ namespace WDCommunication.WDTcp
         /// <summary>
         /// 客户端集合
         /// </summary>
-        private readonly List<OnlineClient> ClientCollect = new();
+        private List<OnlineClient>? ClientCollect = new();
         #endregion
 
         #region 构造函数
@@ -83,6 +83,7 @@ namespace WDCommunication.WDTcp
         }
         #endregion
 
+        #region 属性
         /// <summary>
         /// 对象的Id
         /// </summary>
@@ -147,6 +148,10 @@ namespace WDCommunication.WDTcp
         /// 缓冲区，缺省为1K
         /// </summary>
         public long BufferSize { get; set; } = 1024;
+
+        #endregion
+
+        #region 方法
         /// <summary>
         /// 启动监听服务
         /// </summary>
@@ -157,9 +162,9 @@ namespace WDCommunication.WDTcp
             Listener = new TcpListener(IpAddress, Port);
             Listener.Start();
             State = EnumServerStateType.运行;
-            TokenSource = new CancellationTokenSource();
+            CancelTokenSource = new CancellationTokenSource();
             Task.Factory.StartNew(() => Accept(Listener),
-                TokenSource.Token,
+                CancelTokenSource.Token,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Current);
             return true;
@@ -170,8 +175,8 @@ namespace WDCommunication.WDTcp
         public bool Stop()
         {
             if (State == EnumServerStateType.停止) return false;
-            TokenSource!.Cancel();
-            for (int i = ClientCollect.Count - 1; i >= 0; i--)
+            CancelTokenSource!.Cancel();
+            for (int i = ClientCollect!.Count - 1; i >= 0; i--)
             {
                 var client = ClientCollect[i];
                 ClientCollect.RemoveAt(i);
@@ -189,7 +194,7 @@ namespace WDCommunication.WDTcp
         /// <exception cref="Exception"></exception>
         private void Accept(TcpListener server)
         {
-            while (!TokenSource!.Token.IsCancellationRequested)
+            while (!CancelTokenSource!.Token.IsCancellationRequested)
             {
                 try
                 {
@@ -198,7 +203,7 @@ namespace WDCommunication.WDTcp
                     Task.Run(() =>
                     {
                         OnlineClient onlineClient = new(client);
-                        if (!ClientCollect.Contains(onlineClient))
+                        if (!ClientCollect!.Contains(onlineClient))
                         {
                             //客户端TcpClient添加到字典中
                             ClientCollect.Add(onlineClient);
@@ -207,7 +212,7 @@ namespace WDCommunication.WDTcp
                             onlineClient.Push += OnlineClient_Push;
                         }
                         Receive(onlineClient);
-                    }, TokenSource.Token);
+                    }, CancelTokenSource.Token);
                 }
                 catch (Exception)
                 {
@@ -262,7 +267,7 @@ namespace WDCommunication.WDTcp
         /// <returns></returns>
         public async Task<bool> SendAsync(string Ip_Port, byte[] data)
         {
-            var client = ClientCollect.Where((client) => { return client.IP_Port == Ip_Port; }).First();
+            var client = ClientCollect!.Where((client) => { return client.IP_Port == Ip_Port; }).FirstOrDefault();
             if (client == null) return false;
             //var task= await SendAsync(client, data);
             return await SendAsync(client, data);
@@ -275,14 +280,14 @@ namespace WDCommunication.WDTcp
         /// <param name="data"></param>
         public async Task<bool> SendAsync(OnlineClient client, byte[] data)
         {
-            if (!ClientCollect.Contains(client)) return false;
+            if (!ClientCollect!.Contains(client)) return false;
             var tcpClient = client.Client;
             if (tcpClient.Connected)
             {
                 try
                 {
                     var NetStream = tcpClient.GetStream();
-                    await NetStream.WriteAsync(data, TokenSource!.Token)
+                    await NetStream.WriteAsync(data, CancelTokenSource!.Token)
                         .ConfigureAwait(false);
                     EventAfterSend?.Invoke(this, new DataEventAges(client.IpEndPoint, DataEventAges.EnumDataType.Send, data));
                     return true;
@@ -294,9 +299,31 @@ namespace WDCommunication.WDTcp
                 return false;
             }
         }
+        #endregion
 
+        #region Disposed
+        ~Server()
+        {
+            Dispose();
+        }
+        private bool isDisposed = false;
         public void Dispose()
         {
+            Dispose(true);
         }
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (isDisposed) return;
+            if (isDisposing)
+            {
+                //清理托管资源
+
+                //清理非托管资源
+
+                isDisposed = true;
+            }
+        }
+        #endregion
     }
 }

@@ -10,8 +10,7 @@ namespace WDCommunication.WDTcp
         /// <summary>
         /// 推送数据
         /// </summary>
-        public event delegatePush? Push;
-        public delegate void delegatePush(OnlineClient Client, byte[] Data);
+        public event Action<OnlineClient, byte[]>? Push;
 
         private readonly List<byte[]> DataList = new();
         private long TotalLength = 0;
